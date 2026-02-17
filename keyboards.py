@@ -109,14 +109,27 @@ def search_filter_keyboard():
     )
     return keyboard
 
-def job_types_keyboard():
-    """Ish turlari ro'yxati"""
+def position_keyboard():
+    """Pozitsiya tanlash tugmalari"""
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="💊 Operator", callback_data="job_operator")],
-            [InlineKeyboardButton(text="💼 Sotuvchi", callback_data="job_sotuvchi")],
-            [InlineKeyboardButton(text="💉 Dori tayyorlash", callback_data="job_dori")],
-            [InlineKeyboardButton(text="🧹 Farrosh", callback_data="job_farrosh")]
+            [InlineKeyboardButton(text="👨‍🎓 Talaba", callback_data="position_student")],
+            [InlineKeyboardButton(text="👨‍🏫 O'qituvchi", callback_data="position_teacher")]
+        ]
+    )
+    return keyboard
+
+def faculty_keyboard():
+    """Fakultetlar ro'yxati"""
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Axborot texnologiyalari va telekommunikatsiyalar", callback_data="faculty_it")],
+            [InlineKeyboardButton(text="Mexanika-mashinasozlik", callback_data="faculty_mech")],
+            [InlineKeyboardButton(text="Energetika muhandisligi", callback_data="faculty_energy")],
+            [InlineKeyboardButton(text="Kimyo texnologiya", callback_data="faculty_chem")],
+            [InlineKeyboardButton(text="Arxitektura va qurilish", callback_data="faculty_arch")],
+            [InlineKeyboardButton(text="Ishlab chiqarishda boshqaruv", callback_data="faculty_mgmt")],
+            [InlineKeyboardButton(text="Yengil sanoat va to'qimachilik", callback_data="faculty_textile")]
         ]
     )
     return keyboard

@@ -8,7 +8,7 @@ from states import FormStates, AdminStates, ContactStates, ReplyStates
 from keyboards import (
     main_menu, cancel_keyboard, confirm_keyboard, admin_keyboard,
     phone_keyboard, search_filter_keyboard, about_bot_keyboard,
-    vacancy_confirm_keyboard, reply_to_user_keyboard
+    vacancy_confirm_keyboard, reply_to_user_keyboard, position_keyboard, faculty_keyboard
 )
 import database
 
@@ -29,10 +29,21 @@ async def cmd_start(message: Message):
 @router.message(F.text == "ℹ️ Bot haqida")
 async def about_bot(message: Message):
     await message.answer(
-        "🤖 <b>Bot haqida</b>\n\n"
-        "Bu bot Farg'ona davlat texnika universiteti Logotip tanlovini "
-        "o'tkazish maqsadida yaratilgan.\n\n"
-        "📝 Bot orqali siz:\n• Logotipingizni yuborishingiz\n• Tanlov natijalarini bilib olishingiz mumkin\n\n"
+        "🎨 <b>Eng yaxshi logotip tanlovi</b>\n\n"
+        "Farg'ona davlat texnika universiteti yangi ko'rinishdagi logotip yaratish bo'yicha "
+        "\"Eng yaxshi logotip\" tanlovini e'lon qiladi.\n\n"
+        "📋 <b>Talablar:</b>\n"
+        "• Logotip universitet nomi va maqomini to'liq ifodalashi\n"
+        "• Ilmiy salohiyatini aks ettirishi\n"
+        "• Bosma va raqamli shaklda sifatini yo'qotmasligi\n"
+        "• Mualliflik huquqini buzmasligi\n\n"
+        "🏆 <b>Mukofotlar:</b>\n"
+        "1-o'rin – 7 000 000 so'm va diplom\n"
+        "2-o'rin – 4 000 000 so'm va diplom\n"
+        "3-o'rin – 2 000 000 so'm va diplom\n\n"
+        "Shuningdek, hakamlar hay'ati tomonidan saralangan 10 nafar eng yaxshi ish mualliflari rag'batlantiriladi.\n\n"
+        "👥 <b>Ishtirokchilar:</b>\n"
+        "Tanlovda universitet professor-o'qituvchilari, xodimlar va talabalar ishtirok etishlari mumkin.\n\n"
         "Savol va masalalar yuzasidan adminga murojaat qilishingiz mumkin.",
         parse_mode="HTML",
         reply_markup=about_bot_keyboard()
@@ -52,20 +63,50 @@ async def process_full_name(message: Message, state: FSMContext):
         await message.answer("❌ Bekor qilindi.", reply_markup=admin_keyboard() if is_admin else main_menu())
         return
     await state.update_data(full_name=message.text)
-    await state.set_state(FormStates.faculty)
-    await message.answer("Fakultetingizni kiriting:", reply_markup=cancel_keyboard())
+    await state.set_state(FormStates.position)
+    await message.answer("O'z pozitsiyangizni belgilang:", reply_markup=position_keyboard())
 
-@router.message(FormStates.faculty)
-async def process_faculty(message: Message, state: FSMContext):
-    if message.text == "❌ Bekor qilish":
-        await state.clear()
-        user_id = message.from_user.id
-        is_admin = user_id == ADMIN_ID
-        await message.answer("❌ Bekor qilindi.", reply_markup=admin_keyboard() if is_admin else main_menu())
-        return
-    await state.update_data(faculty=message.text)
-    await state.set_state(FormStates.group)
-    await message.answer("Guruhingizni kiriting:", reply_markup=cancel_keyboard())
+# Pozitsiya tanlash callback handleri
+@router.callback_query(F.data.startswith("position_"))
+async def process_position(callback: CallbackQuery, state: FSMContext):
+    position = "Talaba" if callback.data == "position_student" else "O'qituvchi"
+    await state.update_data(position=position)
+    await state.set_state(FormStates.faculty)
+    await callback.message.answer("O'z fakultetingizni tanlang:", reply_markup=faculty_keyboard())
+    await callback.answer()
+
+# Fakultet tanlash callback handleri
+FACULTY_NAMES = {
+    "faculty_it": "Axborot texnologiyalari va telekommunikatsiyalar",
+    "faculty_mech": "Mexanika-mashinasozlik",
+    "faculty_energy": "Energetika muhandisligi",
+    "faculty_chem": "Kimyo texnologiya",
+    "faculty_arch": "Arxitektura va qurilish",
+    "faculty_mgmt": "Ishlab chiqarishda boshqaruv",
+    "faculty_textile": "Yengil sanoat va to'qimachilik"
+}
+
+@router.callback_query(F.data.startswith("faculty_"))
+async def process_faculty(callback: CallbackQuery, state: FSMContext):
+    faculty = FACULTY_NAMES.get(callback.data, "Noma'lum")
+    await state.update_data(faculty=faculty)
+    
+    # Pozitsiyani tekshirish
+    data = await state.get_data()
+    position = data.get('position', '')
+    
+    if position == "Talaba":
+        # Talaba uchun guruh so'rash
+        await state.set_state(FormStates.group)
+        await callback.message.answer("Guruhingizni kiriting:", reply_markup=cancel_keyboard())
+    else:
+        # O'qituvchi uchun guruhni o'tkazib yuborish
+        await state.set_state(FormStates.phone)
+        await callback.message.answer(
+            "Telefon raqamingizni yuboring:\n\n📱 Kontakt ulashish tugmasini bosing yoki raqamni yozing.",
+            reply_markup=phone_keyboard()
+        )
+    await callback.answer()
 
 @router.message(FormStates.group)
 async def process_group(message: Message, state: FSMContext):
@@ -107,14 +148,20 @@ async def process_logo(message: Message, state: FSMContext):
     await state.update_data(logo=logo_id)
     data = await state.get_data()
     
+    # Summaryni yaratish
     summary = (
         "📋 <b>Sizning ma'lumotlaringiz:</b>\n\n"
         f"👤 <b>Ism va familya:</b> {data['full_name']}\n"
+        f"👔 <b>Pozitsiya:</b> {data['position']}\n"
         f"🎓 <b>Fakultet:</b> {data['faculty']}\n"
-        f"👥 <b>Guruh:</b> {data['group']}\n"
-        f"📞 <b>Telefon:</b> {data['phone']}\n\n"
-        "Ma'lumotlar to'g'rimi?"
     )
+    
+    # Agar talaba bo'lsa guruhni ko'rsatish
+    if data.get('position') == "Talaba":
+        summary += f"👥 <b>Guruh:</b> {data['group']}\n"
+    
+    summary += f"📞 <b>Telefon:</b> {data['phone']}\n\n"
+    summary += "Ma'lumotlar to'g'rimi?"
     
     await message.answer_photo(photo=data['logo'], caption=summary, parse_mode="HTML", reply_markup=confirm_keyboard())
 
@@ -129,23 +176,51 @@ async def process_logo_invalid(message: Message, state: FSMContext):
     await message.answer("❌ Iltimos, logotip rasmini yuboring!")
 
 @router.callback_query(F.data == "confirm_send")
-async def confirm_send(callback: CallbackQuery, state: FSMContext, bot):
+async def confirm_send(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    
+    # Ma'lumotlar to'liqligini tekshirish
+    required_fields = ['full_name', 'position', 'faculty', 'phone', 'logo']
+    
+    # Agar talaba bo'lsa guruh ham majburiy
+    if data.get('position') == "Talaba":
+        required_fields.append('group')
+    
+    missing_fields = [field for field in required_fields if field not in data]
+    
+    if missing_fields:
+        await callback.answer("❌ Ma'lumotlar to'liq emas! Iltimos, qaytadan to'ldiring.", show_alert=True)
+        await state.clear()
+        await callback.message.answer(
+            "Iltimos, formani qaytadan to'ldiring:",
+            reply_markup=main_menu()
+        )
+        return
+    
     user = callback.from_user
     database.save_user(user.id, data)
     
     username = user.username if user.username else "Yo'q"
+    
+    # Admin uchun xabar yaratish
     admin_message = (
         "📨 <b>Yangi logotip!</b>\n\n"
-        f"� <b>Ishm va familya:</b> {data['full_name']}\n"
+        f"👤 <b>Ism va familya:</b> {data['full_name']}\n"
+        f"👔 <b>Pozitsiya:</b> {data['position']}\n"
         f"🎓 <b>Fakultet:</b> {data['faculty']}\n"
-        f"👥 <b>Guruh:</b> {data['group']}\n"
-        f"📞 <b>Telefon:</b> {data['phone']}\n\n"
-        f"🆔 <b>Telegram ID:</b> {user.id}\n"
-        f"�‍<💼 <b>Username:</b> @{username}"
     )
     
-    await bot.send_photo(
+    # Agar talaba bo'lsa guruhni qo'shish
+    if data.get('position') == "Talaba":
+        admin_message += f"👥 <b>Guruh:</b> {data['group']}\n"
+    
+    admin_message += (
+        f"📞 <b>Telefon:</b> {data['phone']}\n\n"
+        f"🆔 <b>Telegram ID:</b> {user.id}\n"
+        f"👨‍💼 <b>Username:</b> @{username}"
+    )
+    
+    await callback.bot.send_photo(
         chat_id=ADMIN_ID,
         photo=data['logo'],
         caption=admin_message,
@@ -195,7 +270,7 @@ async def process_vacancy(message: Message, state: FSMContext):
     )
 
 @router.callback_query(F.data == "confirm_vacancy")
-async def confirm_vacancy(callback: CallbackQuery, state: FSMContext, bot):
+async def confirm_vacancy(callback: CallbackQuery, state: FSMContext):
     """Vakansiyani tasdiqlash va yuborish"""
     data = await state.get_data()
     vacancy_text = data['vacancy_text']
@@ -211,7 +286,7 @@ async def confirm_vacancy(callback: CallbackQuery, state: FSMContext, bot):
         if user_id == ADMIN_ID:
             continue
         try:
-            await bot.send_message(chat_id=user_id, text=f"📢 <b>Yangi e'lon!</b>\n\n{vacancy_text}", parse_mode="HTML")
+            await callback.bot.send_message(chat_id=user_id, text=f"📢 <b>Yangi e'lon!</b>\n\n{vacancy_text}", parse_mode="HTML")
             success_count += 1
         except Exception as e:
             failed_count += 1
@@ -317,7 +392,7 @@ async def contact_admin(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 @router.message(ContactStates.message)
-async def process_contact_message(message: Message, state: FSMContext, bot):
+async def process_contact_message(message: Message, state: FSMContext):
     """Adminga xabar yuborish"""
     if message.text == "❌ Bekor qilish":
         await state.clear()
@@ -337,7 +412,7 @@ async def process_contact_message(message: Message, state: FSMContext, bot):
     )
     
     try:
-        await bot.send_message(
+        await message.bot.send_message(
             chat_id=ADMIN_ID,
             text=admin_msg,
             parse_mode="HTML",
@@ -373,23 +448,23 @@ async def reply_button_clicked(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 @router.message(ReplyStates.message)
-async def process_reply_message(callback: Message, state: FSMContext, bot):
+async def process_reply_message(message: Message, state: FSMContext):
     """Foydalanuvchiga javob yuborish"""
-    if callback.text == "❌ Bekor qilish":
+    if message.text == "❌ Bekor qilish":
         await state.clear()
-        await callback.answer("❌ Bekor qilindi.", reply_markup=admin_keyboard())
+        await message.answer("❌ Bekor qilindi.", reply_markup=admin_keyboard())
         return
     
     data = await state.get_data()
     user_id = data['user_id']
     
     try:
-        await bot.send_message(
+        await message.bot.send_message(
             chat_id=user_id,
-            text=f"📩 <b>Admin javob berdi:</b>\n\n{callback.text}",
+            text=f"📩 <b>Admin javob berdi:</b>\n\n{message.text}",
             parse_mode="HTML"
         )
-        await callback.answer(
+        await message.answer(
             "✅ Xabar muvaffaqiyatli yuborildi!",
             reply_markup=admin_keyboard()
         )

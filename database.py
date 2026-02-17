@@ -1,11 +1,27 @@
 """Ma'lumotlarni saqlash uchun oddiy modul"""
 
 # Vakansiya matni
-current_vacancy = """Assalomu alaykum! 👋
+current_vacancy = """🎨 <b>Eng yaxshi logotip tanlovi</b>
 
-Farg'ona davlat texnika universiteti Logotip tanloviga xush kelibsiz!
+Farg'ona davlat texnika universiteti yangi ko'rinishdagi logotip yaratish bo'yicha "Eng yaxshi logotip" tanlovini e'lon qiladi.
 
-Logotipingizni yuborish uchun quyidagi ma'lumotlarni to'ldiring."""
+📋 <b>Talablar:</b>
+• Logotip universitet nomi va maqomini to'liq ifodalashi
+• Ilmiy salohiyatini aks ettirishi
+• Bosma va raqamli shaklda sifatini yo'qotmasligi
+• Mualliflik huquqini buzmasligi
+
+🏆 <b>Mukofotlar:</b>
+1-o'rin – 7 000 000 so'm va diplom
+2-o'rin – 4 000 000 so'm va diplom
+3-o'rin – 2 000 000 so'm va diplom
+
+Shuningdek, hakamlar hay'ati tomonidan saralangan 10 nafar eng yaxshi ish mualliflari rag'batlantiriladi.
+
+👥 <b>Ishtirokchilar:</b>
+Tanlovda universitet professor-o'qituvchilari, xodimlar va talabalar ishtirok etishlari mumkin.
+
+Logotipingizni yuborish uchun "📝 Logotip yuborish" tugmasini bosing."""
 
 # Foydalanuvchilar ro'yxati
 users = {}

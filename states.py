@@ -3,6 +3,7 @@ from aiogram.fsm.state import State, StatesGroup
 class FormStates(StatesGroup):
     """Anketa to'ldirish holatlari"""
     full_name = State()
+    position = State()
     faculty = State()
     group = State()
     phone = State()
