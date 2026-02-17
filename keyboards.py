@@ -4,7 +4,7 @@ def main_menu():
     """Asosiy menyu"""
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="📝 Anketa to'ldirish")],
+            [KeyboardButton(text="📝 Logotip yuborish")],
             [KeyboardButton(text="ℹ️ Bot haqida")]
         ],
         resize_keyboard=True
@@ -58,8 +58,8 @@ def admin_keyboard():
     """Admin paneli"""
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="📢 Vakansiya e'lon qilish")],
-            [KeyboardButton(text="🔍 Foydalanuvchilarni qidirish")],
+            [KeyboardButton(text="📢 E'lon yuborish")],
+            [KeyboardButton(text="🔍 Ishtirokchilarni qidirish")],
             [KeyboardButton(text="📊 Statistika")]
         ],
         resize_keyboard=True

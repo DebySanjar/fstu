@@ -2,15 +2,11 @@ from aiogram.fsm.state import State, StatesGroup
 
 class FormStates(StatesGroup):
     """Anketa to'ldirish holatlari"""
-    job_type = State()
-    name = State()
-    age = State()
-    education = State()
-    previous_work = State()
-    current_status = State()
-    address = State()
-    photo = State()
+    full_name = State()
+    faculty = State()
+    group = State()
     phone = State()
+    logo = State()
 
 class AdminStates(StatesGroup):
     """Admin holatlari"""

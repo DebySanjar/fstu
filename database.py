@@ -3,9 +3,9 @@
 # Vakansiya matni
 current_vacancy = """Assalomu alaykum! 👋
 
-Burj Aptekaga ishga ariza berish uchun iltimos quyidagi ma'lumotlarni yozib yuboring.
+Farg'ona davlat texnika universiteti Logotip tanloviga xush kelibsiz!
 
-Sizning ma'lumotlaringizni qabul qilingandan so'ng siz bilan bog'lanamiz"""
+Logotipingizni yuborish uchun quyidagi ma'lumotlarni to'ldiring."""
 
 # Foydalanuvchilar ro'yxati
 users = {}

@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv('BOT_TOKEN', '7979034038:AAGs3G1CtNZjju5acfdCMMHbbVwE7yDH7Qc')
-ADMIN_ID = int(os.getenv('ADMIN_ID', '1961347582'))
+BOT_TOKEN = os.getenv('BOT_TOKEN', '8597744088:AAGggNPeXU-SGPZLvz4C-DE77WdP_q2GIdU')
+ADMIN_ID = int(os.getenv('ADMIN_ID', '7176985245'))
 
 # Xatoliklarni tekshirish
 if not BOT_TOKEN:
